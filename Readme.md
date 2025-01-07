@@ -26,34 +26,19 @@ Cada registro está etiquetado con como **benigno (2)** o **maligno (4)**.
 
 Las variables que contiene el dataset son:
 
-+--------------------------+------------------------------------------------+--------------+
 | Variable                 | Descripción                                    | Rango        |
-+==========================+================================================+==============+
+|--------------------------|------------------------------------------------|--------------|
 | SampleCodeNumber         | Identificación única del tumor                 | ID           |
-+--------------------------+------------------------------------------------+--------------+
 | ClumpThickness           | Espesor del grupo de células                   | 1 - 10       |
-+--------------------------+------------------------------------------------+--------------+
 | UniformityCellSize       | Uniformidad en el tamaño de las células.       | 1 - 10       |
-+--------------------------+------------------------------------------------+--------------+
 | UniformityCellShape      | Uniformidad en la forma de las células         | 1 - 10       |
-+--------------------------+------------------------------------------------+--------------+
 | MarginalAdhesion         | Adhesión marginal de las células               | 1 - 10       |
-+--------------------------+------------------------------------------------+--------------+
 | SingleEpithelialCellSize | Tamaño de una sola célula epitelial            | 1 - 10       |
-+--------------------------+------------------------------------------------+--------------+
 | BareNuclei               | Presencia de núcleos desnudos (sin citoplasma) | 1 - 10       |
-+--------------------------+------------------------------------------------+--------------+
 | BlandChromatin           | Cantidad de cromatina blanda en los núcleos    | 1 - 10       |
-+--------------------------+------------------------------------------------+--------------+
 | NormalNucleoli           | Presencia de nucléolos normales                | 1 - 10       |
-+--------------------------+------------------------------------------------+--------------+
 | Mitoses                  | Número de mitosis observadas                   | 1 - 10       |
-+--------------------------+------------------------------------------------+--------------+
-| Class                    | Indica si el tumor es benigno o malingno       | 2 = benigno  |
-|                          |                                                |              |
-|                          |                                                | 4 = maligno  |
-+--------------------------+------------------------------------------------+--------------+
-
+| Class                    | Indica si el tumor es benigno o malingno       | 2 = benigno  4 = maligno  |
 ---
 
 ## Preprocesamiento de Datos
