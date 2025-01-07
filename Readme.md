@@ -87,7 +87,7 @@ Para este proyecto, las medidas de desempeño utilizadas fueron las siguientes:
 
 Luego de evaluar el modelo de regresión logística con validación cruzada, las métricas de desempeño fueron:
 
-- **Precicisón:** $0.9652$
+- **Precisión:** $0.9652$
 
 - **Sensibilidad:** $0.9857$
 
