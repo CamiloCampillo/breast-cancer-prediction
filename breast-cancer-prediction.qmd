@@ -1,0 +1,386 @@
+---
+title: "Predicción de cáncer de mama usando regresión logística"
+author: "*Camilo A. Campillo M.*"
+format: 
+  html:
+    toc: true
+    toc-expand: true
+    toc-location: left
+    code-block-bg: true
+    code-block-border-left: "#31BAE9"
+    df-print: paged
+execute:
+  warning: false
+  message: false
+editor: visual
+---
+
+![](mujer.jpeg){fig-align="center"}
+
+## Introducción del proyecto
+
+El cáncer de mama es una de las enfermedades más prevalentes y con mayor impacto en la salud global, especialmente entre las mujeres. La detección temprana de esta enfermedad es crucial para aumentar las tasas de supervivencia y mejorar la calidad de vida de los pacientes.
+
+## Objetivo del proyecto
+
+El objetivo principal de este proyecto es construir modelos de machine learning que sean capaces de clasificar de manera precisa si una masa mamaria es benigna o maligna en función de las características proporcionadas.
+
+## Paquetes para el proyecto
+
+```{r}
+library(dplyr)        # Manupulación de datos
+library(readr)        # Lectura de datos
+library(ggplot2)      # Visualización
+library(corrplot)     # Matriz de correlaciones
+library(gridExtra)    # Para ordenar gráficos
+library(caret)        # Paquete de Machine Learning
+library(plotly)       # Gráficos interactivos
+library(ggeasy)       # Herramientas de diseño
+library(corrplot)     # Mapa de correlaciónes 
+library(pROC)         # Curva ROC
+library(DescTools)    # HErramientas de análisis de datos
+```
+
+## Exploración de estructura
+
+El dataset de **Cáncer de Mama de Wisconsin (Original)** se centra en la clasificación de tumores mamarios basándose en características clínicas y morfológicas. Cada registro representa un caso clínico, y está diseñado para ayudar en la identificación de tumores benignos y malignos. Los datos fueron recopilados por el Dr. William Wolberg y reflejan casos clínicos reportados entre 1988 y 1991. Las características incluyen medidas relacionadas con la forma y tamaño de las células, así como otros atributos histológicos que son relevantes para la evaluación del cáncer.
+
+### Dataset
+
+```{r}
+# Nombres de variables 
+name_breast <- c("SampleCodeNumber", "ClumpThickness", "UniformityCellSize", 
+                 "UniformityCellShape", "MarginalAdhesion", 
+                 "SingleEpithelialCellSize", "BareNuclei", "BlandChromatin", 
+                 "NormalNucleoli", "Mitoses", "Class")
+```
+
+```{r}
+# Importando dataset
+breast <- read.table("breast-cancer-wisconsin.data", 
+                     sep = ",", col.names = name_breast)
+```
+
+### Primeras impresiones del dataset
+
+```{r}
+# Primeros datos
+head(breast)
+```
+
+```{r}
+# Últimos datos
+tail(breast)
+```
+
+### Dimensiones del dataset
+
+```{r}
+# Cantidad de columnas
+print(paste("El número de variables es", ncol(breast)))
+```
+
+```{r}
+print(paste("El número de registros es:", nrow(breast)))
+```
+
+### Información del dataset
+
+```{r}
+# Exploracion de variables
+glimpse(breast)
+```
+
+### Datos faltantes y duplicados
+
+```{r}
+# Datos faltantes
+colSums(is.na(breast))
+```
+
+```{r}
+print(paste("El dataset contiene", sum(is.na(breast)), "faltantes"))
+```
+
+```{r}
+# Contar Duplicados
+paste("El dataset contiene", sum(duplicated(breast)), "registros duplicados")
+```
+
+```{r}
+# Identificar cuales son los duplicados
+breast %>%
+  filter(duplicated(breast) | duplicated(breast, fromLast = TRUE)) %>% 
+  arrange(SampleCodeNumber)
+```
+
+### Valores únicos
+
+```{r}
+# Observando cantidad de valores únicos
+sapply(breast, function(x) length(unique(x))) %>% 
+  data.frame()
+```
+
+```{r}
+# Observando valores únicos
+sapply(breast[,2:11], unique)
+```
+
+Se observa que dentro de los valores únicos que hay en cada variable, hay un valor que resulta extraño en una variable **BareNuclei.** Esta variable está identificada como un caracter y dentro de este se encuentra un valor de `"?"`. Se procede a observar si las demás variables de ese registro tienen ese valor diferente y cuantos son.
+
+```{r}
+# Observando registros
+breast %>% filter(BareNuclei == "?")
+```
+
+Se encuentran **16 observaciones** que contiene este símbolo, entonces se procede a eliminar estos registros para garantizar que nuestro dataset esté limpio.
+
+```{r}
+# Filtrando los registros sin "?"
+breast <- breast %>% filter(!BareNuclei == "?")
+```
+
+### Limpieza del dataset
+
+```{r}
+# Eliminación de duplicados
+breast <- breast %>% 
+  dplyr::distinct()
+```
+
+```{r}
+# Eliminar columna variable
+breast <- breast %>% 
+  select(-SampleCodeNumber)
+```
+
+```{r}
+# Cambiar tipo de datos
+breast$BareNuclei <- breast$BareNuclei %>%  
+  as.integer()
+
+# Cambiando valores
+breast$Class <- ifelse(breast$Class == 4, "1", "0")
+
+# Convirtiendo en factores
+breast$Class <- factor(breast$Class)
+```
+
+### Resumen del dataset
+
+El dataset **breast** original contenia un total de **11 variables** y unos **699 registros**. de los cuales **8** son valores duplicados. Luego de realizar la respectiva limpieza quedaron en total **675** observaciones para trabajar.
+
+Este dataset no cuenta con valores faltantes (NA's).
+
+Las variables que contiene el dataset son:
+
++--------------------------+------------------------------------------------+-------------+
+| Variable                 | Descripción                                    | Rango       |
++==========================+================================================+=============+
+| SampleCodeNumber         | Identificación única del tumor                 | ID          |
++--------------------------+------------------------------------------------+-------------+
+| ClumpThickness           | Espesor del grupo de células                   | 1 - 10      |
++--------------------------+------------------------------------------------+-------------+
+| UniformityCellSize       | Uniformidad en el tamaño de las células.       | 1 - 10      |
++--------------------------+------------------------------------------------+-------------+
+| UniformityCellShape      | Uniformidad en la forma de las células         | 1 - 10      |
++--------------------------+------------------------------------------------+-------------+
+| MarginalAdhesion         | Adhesión marginal de las células               | 1 - 10      |
++--------------------------+------------------------------------------------+-------------+
+| SingleEpithelialCellSize | Tamaño de una sola célula epitelial            | 1 - 10      |
++--------------------------+------------------------------------------------+-------------+
+| BareNuclei               | Presencia de núcleos desnudos (sin citoplasma) | 1 - 10      |
++--------------------------+------------------------------------------------+-------------+
+| BlandChromatin           | Cantidad de cromatina blanda en los núcleos    | 1 - 10      |
++--------------------------+------------------------------------------------+-------------+
+| NormalNucleoli           | Presencia de nucléolos normales                | 1 - 10      |
++--------------------------+------------------------------------------------+-------------+
+| Mitoses                  | Número de mitosis observadas                   | 1 - 10      |
++--------------------------+------------------------------------------------+-------------+
+| Class                    | Indica si el tumor es benigno o malingno       | 2 = benigno |
+|                          |                                                |             |
+|                          |                                                | 4 = maligno |
++--------------------------+------------------------------------------------+-------------+
+
+# Visualización de las variables
+
+```{r}
+# Mapa de correlaciones
+corrplot.mixed(cor(breast[, 1:9]),
+               lower = "number", 
+               upper = "circle",
+               tl.col = "black")
+```
+
+```{r fig.height=15}
+# Función
+crear_barplot <- function(data, var, fill_color, title, x_label) {
+  ggplot(data, aes(x = factor(.data[[var]]))) +
+    geom_bar(fill = fill_color) +
+    theme_minimal() +
+    labs(x = x_label, title = title) +
+    geom_text(aes(label = ..count..), stat = "count", 
+              vjust = -1, colour = "black") +
+    ylim(c(0, 700)) +
+    ggeasy::easy_center_title()
+}
+
+# Etiquetas
+variables <- c("ClumpThickness", "UniformityCellSize", "UniformityCellShape", 
+               "MarginalAdhesion", "SingleEpithelialCellSize", "BareNuclei", 
+               "BlandChromatin", "NormalNucleoli", "Mitoses", "Class")
+
+colores <- c("blue", "red", "yellow", "green", "skyblue", 
+             "orange", "purple", "gray", "darkgreen", "brown")
+
+# Gráficos
+graficos <- Map(function(var, color) {
+  crear_barplot(breast, var, color, paste("Barplot", var), var)
+}, variables, colores)
+
+# Cadricula
+do.call(gridExtra::grid.arrange, c(graficos, ncol = 2))
+```
+
+# Modelo de regresión logística
+
+## Data de entrenamiento y test
+
+```{r}
+# Creando índice
+index <- createDataPartition(breast$Class, p = 0.7, list = FALSE)
+
+# Datos de entrenamiento
+train <- breast[index, ]
+
+# Datos de prueba
+test <- breast[-index, ]
+
+```
+
+## Despliegue del modelo y clasificación
+
+```{r}
+# Modelo de regresión
+mrl <- glm(Class ~ ., data = train, family = "binomial")
+
+# Resumen del modelo
+summary(mrl)
+
+# Predicción probabilidad
+test$class_prob <- predict(object =  mrl, newdata = test, type = "response")
+
+# Curva ROC
+roc_curve_test <- roc(test$Class, test$class_prob)
+
+# Gráfico curva ROC
+plot(roc_curve_test, main = "Curva ROC", col = "blue", lwd = 2)
+
+# Ajuste de punto de corte
+threshold_test <- coords(roc_curve_test, "best", ret = "threshold") %>%  
+  pull(threshold)
+
+# Clasificando probabilidades
+test$class_predict <- ifelse(test$class_prob > threshold_test, 1, 0)
+
+# Convertir a factor
+test$class_predict <- factor(test$class_predict, levels = c("1","0"))
+```
+
+## Evaluación del modelo con los parámetros base en data_test
+
+```{r}
+# AUC
+paste("El área bajo la curva ROC es de:", auc(roc_curve_test))
+
+# Matriz de confusión
+confusionMatrix(test$Class, test$class_predict)
+```
+
+## Evaluando modelo con los datos de entrenamiento
+
+```{r}
+# Predicción probabilidad
+train$class_prob <- predict(object =  mrl, newdata = train, type = "response")
+
+# Curva ROC
+roc_curve_train <- roc(train$Class, train$class_prob)
+
+# Gráfico curva ROC
+plot(roc_curve_train, main = "Curva ROC", col = "red", lwd = 2)
+
+# Punto de corte basado en probabilidades
+threshold_train <- coords(roc_curve_train, "best", ret = "threshold") %>% 
+  pull(threshold)
+
+# Clasificando probabilidades
+train$class_predict <- ifelse(train$class_prob > threshold_train, 1, 0)
+
+# Convertir a factor
+train$class_predict <- factor(train$class_predict, levels = c("1","0"))
+
+# AUC
+paste("El área bajo la curva ROC es de:", auc(roc_curve_train))
+
+# Métricas de evaluación
+confusionMatrix(train$Class, train$class_predict)
+
+# Curvas ROC
+plot(roc_curve_train, col = "blue", main = "Curvas ROC", lwd = 1)
+lines(roc_curve_test, col = "red", lwd = 2)
+legend("bottomright", legend=c("Entrenamiento", "Prueba"), 
+       col=c("blue", "red"), lwd=2)
+```
+
+## Validación cruzada
+
+```{r}
+# trainControl
+myControl <- trainControl(
+  method = "cv",
+  number = 10,
+  summaryFunction = twoClassSummary,
+  classProbs = TRUE,
+  verboseIter = TRUE
+)
+```
+
+```{r}
+# Asignando niveles a class train
+levels(train$Class) <- make.names(levels(train$Class))
+train$Class <- relevel(train$Class, ref = "X1")
+
+# Modelo model 
+mrl_cv <- train(Class ~ ., 
+  train, 
+  method = "glm",
+  trControl = myControl,
+  metric = "Recall"
+)
+
+# Imprimir el modelo
+mrl_cv
+```
+
+## Prediccion con modelo de validación cruzada
+
+```{r}
+# Asignando niveles a class test
+levels(test$Class) <- make.names(levels(test$Class))
+test$Class <- relevel(test$Class, ref = "X1")
+
+# Predicciones con validación cruzada
+mrl_cv_predict_class <- predict(mrl_cv, newdata = test)
+
+# Matriz de confusión
+confusionMatrix(mrl_cv_predict_class, test$Class)
+```
+
+# Conclusión
+
+El modelo de regresión logística mostró un desempeño excelente en general al clasificar correctamente los casos positivos y negativos de la enfermedad. Se empleó un enfoque robusto de validación cruzada, asegurando que las métricas de rendimiento no solo fueran evaluadas en el conjunto de entrenamiento, sino también generalizables a datos no vistos. Este análisis es clave para modelos predictivos en problemas tan críticos como el diagnóstico temprano de cáncer de mama.
+
+El modelo alcanzó valores consistentemente altos (mayores a 0.93) en las métricas de rendimiento
+
+Estos resultados muestran la capacidad del modelo de predecir en un gran porcentaje de casos a los paciente que en realidad tienen cáncer, y a su vez, es un modelo que tiene gran capacidad para distinguir a aquellos que no tiene poseen cáncer El uso de validación cruzada con 10 particiones permitió evaluar de manera confiable el rendimiento del modelo en múltiples subconjuntos del conjunto de datos. Las métricas de rendimiento fueron consistentes entre el conjunto de entrenamiento y el conjunto de prueba, lo que indica que el modelo generaliza bien y no presenta problemas de sobreajuste.
