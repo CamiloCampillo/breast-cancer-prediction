@@ -14,5 +14,3 @@ href: https://github.com/CamiloCampillo
 text: Correo
 href: mailto:camilocampillo07@gmail.com
 ---
-  
-  Hola, soy un joven curioso al que le encanta aprender de todo un poco, desde ciencia de datos hasta proyectos súper creativos. Siempre estoy buscando nuevos retos y formas de dejar mi huella (o al menos intentarlo 🙃).
