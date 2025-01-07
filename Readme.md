@@ -1,22 +1,24 @@
-# Predicción de cáncer de mama con algoritmo de machine learning
+# 🤖 Predicción de cáncer de mama con algoritmo de machine learning
 
-## Visita el sitio web en Quarto Pubs
+## 🌐 Visita el sitio web en Quarto Pubs
 
 **Link** 
 
 https://camiloc07.quarto.pub/breast-cancer-predict/
 
+## 📍 Introducción
+
 El cáncer de mama representa una de las principales preocupaciones de salud a nivel global, afectando a millones de mujeres cada año. La detección temprana es fundamental para mejorar las tasas de supervivencia y éxito del tratamiento. Este proyecto tiene como objetivo crear un modelo predictivo utilizando técnicas de aprendizaje automático para clasificar tumores como benignos o malignos. A través de este enfoque, se busca asistir a los profesionales médicos en el diagnóstico precoz, optimizando los resultados clínicos y, en última instancia, contribuyendo a salvar vidas.
 
 ---
 
-## Objetivo del proyecto
+## 💡 Objetivo del proyecto
 
 El propósito principal de este proyecto es desarrollar un modelo de aprendizaje automático preciso y confiable para clasificar tumores de mama como benignos o malignos. El objetivo es ofrecer a los profesionales de la salud una herramienta efectiva para la detección temprana del cáncer, facilitando intervenciones oportunas y mejorando la atención al paciente. Al identificar las características relevantes de los tumores, este modelo actúa como un apoyo esencial para los oncólogos y otros profesionales médicos en su toma de decisiones clínicas.
 
 ---
 
-## Información del dataset
+## 📊 Información del dataset
 
 El proyecto utiliza el conjunto de datos de diagnóstico de cáncer de mama de Wisconsin, que incluye características médicas clave extraídas de biopsias de tumores mamarios. Este conjunto es ampliamente reconocido y utilizado en investigaciones sobre cáncer de mama y en la creación de modelos predictivos, contribuyendo a la mejora de diagnósticos tempranos y el desarrollo de soluciones más precisas en el campo de la oncología.
 
@@ -41,7 +43,7 @@ Las variables que contiene el dataset son:
 | Class                    | Indica si el tumor es benigno o malingno       | 2 = benigno  4 = maligno  |
 ---
 
-## Preprocesamiento de Datos
+## 🔧 Preprocesamiento de Datos
 
 Para asegurar un rendimiento óptimo del modelo de aprendizaje automático, se realizaron pasos clave de preprocesamiento en el conjunto de datos. Estos incluyen:
 
@@ -55,7 +57,7 @@ Para asegurar un rendimiento óptimo del modelo de aprendizaje automático, se r
 
 ---
 
-## Desarrollo y Metodología
+## 💻 Desarrollo y Metodología
 
 La metodología que se usó para este proyecto fue la siguiente: 
 
@@ -67,7 +69,7 @@ La metodología que se usó para este proyecto fue la siguiente:
 
 ---
 
-## Métricas de evaluación
+## 📈 Métricas de evaluación
 
 Para este proyecto, las medidas de desempeño utilizadas fueron las siguientes:
 
@@ -81,7 +83,7 @@ Para este proyecto, las medidas de desempeño utilizadas fueron las siguientes:
 
 ---
 
-## Resultados
+## 📈 Resultados
 
 Luego de evaluar el modelo de regresión logística con validación cruzada, las métricas de desempeño fueron:
 
@@ -97,7 +99,7 @@ Estas métricas indican que el modelo es muy confiable para distinguir entre cas
 
 ---
 
-## Líneas futuras
+## 💡 Líneas futuras
 
 Para el futuro, se pueden explorar varias áreas de mejora en este proyecto:
 
